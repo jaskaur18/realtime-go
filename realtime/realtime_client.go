@@ -21,6 +21,7 @@ type RealtimeClient struct {
 	WebsocketUrl string
 	BroadcastUrl string
 	ApiKey       string
+	UserToken    string
 
 	mu                sync.Mutex
 	conn              *websocket.Conn
@@ -53,6 +54,7 @@ func CreateRealtimeClient(projectRef string, apiKey string) *RealtimeClient {
 		WebsocketUrl:      websocketUrl,
 		BroadcastUrl:      broadcastUrl,
 		ApiKey:            apiKey,
+		UserToken:         apiKey,
 		logger:            newLogger,
 		dialTimeout:       10 * time.Second,
 		heartbeatDuration: 5 * time.Second,
@@ -62,6 +64,10 @@ func CreateRealtimeClient(projectRef string, apiKey string) *RealtimeClient {
 		currentTopics: make(map[string]*RealtimeChannel),
 		replyChan:     make(chan *ReplyPayload),
 	}
+}
+
+func (client *RealtimeClient) SetAuth(token string) {
+	client.UserToken = token
 }
 
 // Connect the client with the realtime server
@@ -121,7 +127,7 @@ func (client *RealtimeClient) subscribe(topic string, bindings []*binding, ctx c
 		client.Connect()
 	}
 
-	msg := createConnectionMessage(topic, bindings)
+	msg := createConnectionMessage(topic, bindings, client.UserToken)
 	err := wsjson.Write(context.Background(), client.conn, msg)
 	if err != nil {
 		return nil, fmt.Errorf("Unable to send the connection message: %v", err)

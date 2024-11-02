@@ -52,6 +52,8 @@ type ConnectionPayload struct {
 
 		PostgresChanges []postgresFilter `json:"postgres_changes,omitempty"`
 	} `json:"config"`
+
+	UserToken string `json:"user_token,omitempty"`
 }
 
 // Payload of the server's first response of three upon joining channel.
@@ -125,7 +127,7 @@ func createMsgMetadata(event string, topic string) *Metadata {
 }
 
 // create a connection message depending on event type
-func createConnectionMessage(topic string, bindings []*binding) *Msg {
+func createConnectionMessage(topic string, bindings []*binding, userToken string) *Msg {
 	msg := &Msg{}
 
 	// Fill out the message template
@@ -142,12 +144,15 @@ func createConnectionMessage(topic string, bindings []*binding) *Msg {
 				payload.Config.PostgresChanges = make([]postgresFilter, 0, 1)
 			}
 			payload.Config.PostgresChanges = append(payload.Config.PostgresChanges, filter.(postgresFilter))
+			payload.UserToken = userToken
 			break
 		case broadcastFilter:
 			payload.Config.Broadcast.Self = true
+			payload.UserToken = userToken
 			break
 		case presenceFilter:
 			payload.Config.Presence.Key = ""
+			payload.UserToken = userToken
 			break
 		default:
 			panic("TYPE ASSERTION FAILED: expecting one of postgresFilter, broadcastFilter, or presenceFilter")
