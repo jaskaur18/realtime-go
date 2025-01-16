@@ -1,4 +1,4 @@
-module github.com/Faless/realtime-go
+module github.com/jaskaur18/realtime-go
 
 go 1.22
 
