@@ -250,8 +250,6 @@ func (client *RealtimeClient) sendHeartbeat() error {
 	ctx, cancel := context.WithTimeout(context.Background(), client.heartbeatDuration)
 	defer cancel()
 
-	client.logger.Print("Sending heartbeat")
-
 	err := wsjson.Write(ctx, client.conn, msg)
 	if err != nil {
 		return fmt.Errorf("Failed to send hearbeat in %f seconds: %w", client.heartbeatDuration.Seconds(), err)
@@ -303,7 +301,7 @@ func (client *RealtimeClient) processMessage(msg RawMsg) {
 		if msg.Ref == heartbeatEvent && status != "ok" {
 			client.logger.Printf("Heartbeat failure from server: %v", payload)
 		} else if msg.Ref == heartbeatEvent && status == "ok" {
-			client.logger.Printf("Heartbeat success from server: %v", payload)
+			// client.logger.Printf("Heartbeat success from server: %v", payload)
 		} else if msg.Ref != heartbeatEvent && status != "ok" {
 			client.replyChan <- nil
 		} else if msg.Ref != heartbeatEvent && status == "ok" {
